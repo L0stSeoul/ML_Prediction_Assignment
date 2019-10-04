@@ -1,0 +1,54 @@
+---
+title: "Prediction Assignment"
+author: "Trevor"
+date: "4 October 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Executive summary
+This assignment is to predict the manner in which a group of excercise enthusiasts did their exercise. 
+
+##Pre-processing
+Read Training and Test Data
+```{r warning=FALSE}
+library(caret)
+library(randomForest)
+set.seed(158)
+train_data <- read.csv("pml-training.csv")
+test_data <- read.csv("pml-testing.csv")
+```
+Clean the data by removing near zeros and N/As
+```{r}
+#Remove near zero
+NZ <- nearZeroVar(train_data)
+train_data <- train_data[,-NZ]
+
+#Remove greater than 90% N/As
+NAs <- sapply(train_data, function(x) mean(is.na(x))) > 0.9
+train_data <- train_data[,NAs==F]
+```
+##Remove variables that won't impact prediction (i.e. X, username, timestamp)
+```{r}
+train_data <- train_data[,-(1:5)]
+```
+
+##Use Machine Learning: Random Forest
+```{r}
+fit <- randomForest(classe~.,data = train_data)
+fit
+```
+
+##Make predictions
+```{r}
+prediction <- predict(fit,newdata=test_data)
+```
+
+Get the the prediction as characters
+```{r}
+prediction <- as.character(prediction)
+prediction
+```
